@@ -321,20 +321,26 @@ class VideoPlayer {
   @visibleForTesting
   void setBuffering(bool buffering) {
     if (_isBuffering != buffering) {
+      final Duration? duration =
+          convertNumVideoDurationToPluginDuration(_videoElement.duration);
       _isBuffering = buffering;
       _eventController.add(VideoEvent(
         eventType: _isBuffering
             ? VideoEventType.bufferingStart
             : VideoEventType.bufferingEnd,
+        duration: duration,
       ));
     }
   }
 
   // Broadcasts the [web.HTMLVideoElement.buffered] status through the [events] stream.
   void _sendBufferingRangesUpdate() {
+    final Duration? duration =
+        convertNumVideoDurationToPluginDuration(_videoElement.duration);
     _eventController.add(VideoEvent(
       buffered: _toDurationRange(_videoElement.buffered),
       eventType: VideoEventType.bufferingUpdate,
+      duration: duration,
     ));
   }
 

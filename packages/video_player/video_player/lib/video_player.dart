@@ -477,11 +477,20 @@ class VideoPlayerController extends ValueNotifier<VideoPlayerValue> {
           pause().then((void pauseResult) => seekTo(value.duration));
           value = value.copyWith(isCompleted: true);
         case VideoEventType.bufferingUpdate:
-          value = value.copyWith(buffered: event.buffered);
+          value = value.copyWith(
+              duration: event.duration,
+              buffered: event.buffered,
+          );
         case VideoEventType.bufferingStart:
-          value = value.copyWith(isBuffering: true);
+          value = value.copyWith(
+              duration: event.duration,
+              isBuffering: true,
+          );
         case VideoEventType.bufferingEnd:
-          value = value.copyWith(isBuffering: false);
+          value = value.copyWith(
+              duration: event.duration,
+              isBuffering: false,
+          );
         case VideoEventType.isPlayingStateUpdate:
           if (event.isPlaying ?? false) {
             value =
