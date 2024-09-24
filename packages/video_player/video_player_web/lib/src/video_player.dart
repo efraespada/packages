@@ -109,16 +109,22 @@ class VideoPlayer {
     });
 
     _videoElement.onPlay.listen((dynamic _) {
+      final Duration? duration =
+        convertNumVideoDurationToPluginDuration(_videoElement.duration);
       _eventController.add(VideoEvent(
         eventType: VideoEventType.isPlayingStateUpdate,
         isPlaying: true,
+        duration: duration,
       ));
     });
 
     _videoElement.onPause.listen((dynamic _) {
+      final Duration? duration =
+        convertNumVideoDurationToPluginDuration(_videoElement.duration);
       _eventController.add(VideoEvent(
         eventType: VideoEventType.isPlayingStateUpdate,
         isPlaying: false,
+        duration: duration,
       ));
     });
 
@@ -202,9 +208,10 @@ class VideoPlayer {
 
   /// Moves the playback head to a new `position`.
   ///
-  /// `position` cannot be negative.
+  /// `position` and `duration` cannot be negative.
   void seekTo(Duration position) {
-    assert(!position.isNegative);
+    final Duration? duration =
+        convertNumVideoDurationToPluginDuration(_videoElement.duration);
 
     // Don't seek if video is already at target position.
     //
@@ -213,7 +220,10 @@ class VideoPlayer {
     // events on the web.
     //
     // See: https://github.com/flutter/flutter/issues/77674
-    if (position == _videoElementCurrentTime) {
+    if (duration == null ||
+        position > duration ||
+        position.isNegative ||
+        position == _videoElementCurrentTime) {
       return;
     }
 
@@ -321,20 +331,26 @@ class VideoPlayer {
   @visibleForTesting
   void setBuffering(bool buffering) {
     if (_isBuffering != buffering) {
+      final Duration? duration =
+          convertNumVideoDurationToPluginDuration(_videoElement.duration);
       _isBuffering = buffering;
       _eventController.add(VideoEvent(
         eventType: _isBuffering
             ? VideoEventType.bufferingStart
             : VideoEventType.bufferingEnd,
+        duration: duration,
       ));
     }
   }
 
   // Broadcasts the [web.HTMLVideoElement.buffered] status through the [events] stream.
   void _sendBufferingRangesUpdate() {
+    final Duration? duration =
+        convertNumVideoDurationToPluginDuration(_videoElement.duration);
     _eventController.add(VideoEvent(
       buffered: _toDurationRange(_videoElement.buffered),
       eventType: VideoEventType.bufferingUpdate,
+      duration: duration,
     ));
   }
 
